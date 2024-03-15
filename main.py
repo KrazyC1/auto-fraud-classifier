@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
 
 # give it a title
 st.title("Machine Learning Web App for CIS335")
@@ -26,6 +27,14 @@ def get_dataset(dataset_name):
     if dataset_name == "Auto Fraud Dataset":
         # Load the custom dataset
         data = pd.read_csv("dataset/fraud_oracle.csv")
+        
+        # Label encoding non-numeric columns
+        non_numeric_cols = data.select_dtypes(exclude=np.number).columns
+        label_encoders = {}
+        for col in non_numeric_cols:
+            label_encoders[col] = LabelEncoder()
+            data[col] = label_encoders[col].fit_transform(data[col])
+        
         x = data.drop(columns=['FraudFound_P'])
         y = data['FraudFound_P']
         return x, y
