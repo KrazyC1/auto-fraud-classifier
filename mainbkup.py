@@ -12,8 +12,8 @@ with header:
 
 with dataset:
     st.header("Dataset description")
-    st.text("This is the cancer dataset")
-    cancer_df = pd.read_csv("cancer_dataset.csv")
+    st.text("This is the auto fraud dataset")
+    cancer_df = pd.read_csv("dataset/fraud_oracle.csv")
     st.write(cancer_df.head())
 
 
