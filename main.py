@@ -8,8 +8,30 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
 
-# give it a title
-st.title("Machine Learning Web App for CIS335")
+header = st.container()
+dataset = st.container()
+features = st.container()
+model_training = st.container()
+
+
+with header:
+    st.title("Machine Learning Web App \nBy Clayton Wenzel and Katie Kalmbach for CIS 335")
+    st.text("We will be exploring a dataset with auto insurance claims. Our goal is to classify \nbetween insurance claims that are fraudulent and legitimate.")
+
+with dataset:
+    st.header("Dataset description")
+    st.text("This is the auto fraud dataset. It contains 3 numeric features and \n27 categorical features.")
+    auto_df_pretty = pd.read_csv("dataset/fraud_oracle.csv")
+    auto_df_pretty.iloc[:,[1,7,31]] = auto_df_pretty.iloc[:,[1,7,31]].astype(str)
+    auto_df_pretty.loc[auto_df_pretty["FraudFound_P"] == 0, "FraudFound_P"] = "Legitimate"
+    auto_df_pretty.loc[auto_df_pretty["FraudFound_P"] == 1, "FraudFound_P"] = "Fraudulent"
+    st.write(auto_df_pretty.head())
+
+with features:
+    st.header("Feature Selection")
+    st.text("We removed the variables 'PolicyNumber' and 'RepNumber'. We have decided to \nkeep the other 30 variables as features to predict the outcome of \nthe target variable: FraudFound_P.")
+    st.text("We were interested in more sophisticated feature selection, but PCA wouldn't be \napplicable for the majority of our categorical variables.")
+
 
 st.write("""
 ### Explore different classifiers on different datasets
