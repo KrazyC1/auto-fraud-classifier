@@ -11,6 +11,7 @@ from sklearn.preprocessing import LabelEncoder
 header = st.container()
 dataset = st.container()
 features = st.container()
+normalization = st.container()
 model_training = st.container()
 
 
@@ -20,7 +21,7 @@ with header:
 
 with dataset:
     st.header("Dataset description")
-    st.text("This is the auto fraud dataset. It contains 3 numeric features and \n27 categorical features.")
+    st.text("This is the auto fraud dataset. It contains [##] numeric features and \n[##] categorical features.")
     auto_df_pretty = pd.read_csv("dataset/fraud_oracle.csv")
     auto_df_pretty.iloc[:,[1,7,31]] = auto_df_pretty.iloc[:,[1,7,31]].astype(str)
     auto_df_pretty.loc[auto_df_pretty["FraudFound_P"] == 0, "FraudFound_P"] = "Legitimate"
@@ -31,6 +32,14 @@ with features:
     st.header("Feature Selection")
     st.text("We removed the variables 'PolicyNumber' and 'RepNumber'. We have decided to \nkeep the other 30 variables as features to predict the outcome of \nthe target variable: FraudFound_P.")
     st.text("We were interested in more sophisticated feature selection, but PCA wouldn't be \napplicable for the majority of our categorical variables.")
+
+with normalization:
+    st.header("Normalization Techniques")
+    st.text("You have the option to choose between: No normalization, a Min-Max scaler,\nand a z-score scaler.")
+
+    data_normalization_technique = st.sidebar.selectbox(label="Normalization Technique",
+                                                        options=["None", "Min-Max Scaler", "Z-score Normalization"])
+    st.text(f"You have selected {data_normalization_technique} for your experiment!")
 
 
 st.write("""
@@ -60,6 +69,20 @@ def get_dataset(dataset_name):
         x = data.drop(columns=['FraudFound_P'])
         y = data['FraudFound_P']
         return x, y
+    
+def normalize(data_normalization_technique):
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=0)
+    if data_normalization_technique == "None":
+        return x_train, y_train, x_test, y_test
+    elif data_normalization_technique == "Min-Max Scaler":
+        x_train = (x_train - x_train.min())/(x_train.max() - x_train.min())
+        x_test = (x_test - x_train.min())/(x_train.max() - x_train.min())
+        return x_train, y_train, x_test, y_test
+    else:
+        x_train = (x_train - x_train.mean())/(x_train.std())
+        x_test = (x_test - x_train.mean())/(x_train.std())
+        return x_train, y_train, x_test, y_test
+
 
 def add_parameter_ui(classifier_name):
     params = dict()
@@ -87,16 +110,17 @@ def get_classifier(classifier_name, parameters):
     return clf
 
 
+
 x, y = get_dataset(dataset_name)
 
 st.write(f'Shape of dataset is : {x.shape}')
 st.write(f'Number of classes in the dataset is : {len(np.unique(y))}')
+x_train, y_train, x_test, y_test = normalize(data_normalization_technique)
 params = add_parameter_ui(classifier_name)
 classifier = get_classifier(classifier_name, params)
 
 #### CLASSIFICATION ####
 # Splitting the dataset into the Training set and Test set
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=0)
 
 # Training the classifier
 classifier.fit(x_train, y_train)
